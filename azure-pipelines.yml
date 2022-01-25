@@ -10,10 +10,39 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: TerraformInstaller@0
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: 'latest'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: TerraformTaskV2@2
+  displayName: 'Init terraform'
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    backendServiceArm: 'learning'
+    backendAzureRmResourceGroupName: 'rg-insight-de'
+    backendAzureRmStorageAccountName: 'learning03'
+    backendAzureRmContainerName: 'tfstatede'
+    backendAzureRmKey: 'insight.terraform.tfstatede'
+
+- task: TerraformTaskV2@2
+  displayName: 'Validate terraform'
+  inputs:
+    provider: 'azurerm'
+    command: 'validate'
+
+- task: TerraformTaskV2@2
+  displayName: 'Plan terraform'
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    publishPlanResults: 'out.plan'
+    environmentServiceNameAzureRM: 'learning'
+
+- task: TerraformTaskV2@2
+  displayName: 'Apply terraform'
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    environmentServiceNameAzureRM: 'learning'
